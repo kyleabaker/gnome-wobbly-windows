@@ -1,0 +1,14 @@
+{
+  "description": "Compiz wobbly windows effect thanks to compiz plugin engine.\n\nDoes NOT requires any external library\n\nNB:\nIn case of update error please restart Gnome Shell (on Xorg press ALT+F2 then write r and press enter, on Wayland end the session and log in again)\n\n-----------------------------------\n  Video\n-----------------------------------\nhttps://youtu.be/G8bAVIB9A7A",
+  "name": "Gnome Wobbly Windows",
+  "shell-version": [
+    "45",
+    "46",
+    "47",
+    "48"
+  ],
+  "url": "https://github.com/kyleabaker/gnome-wobbly-windows",
+  "uuid": "gnome-wobbly-windows@kyleabaker.github.com",
+  "settings-schema": "org.gnome.shell.extensions.com.github.kyleabaker.gnome-wobbly-windows",
+  "version": 26
+}
