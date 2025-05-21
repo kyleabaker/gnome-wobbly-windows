@@ -30,7 +30,18 @@ import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/
 
 import { createSettingsData } from './src/settings/data.js';
 
+/**
+ * Preferences window
+ *
+ * @name Prefs
+ * @description Preferences window implementation for GNOME Wobbly Windows
+ */
 export default class Prefs extends ExtensionPreferences {
+  /**
+   * Fill preferences window
+   *
+   * @param {Gtk.Window} window
+   */
   fillPreferencesWindow(window) {
     const settingsData = createSettingsData(this.getSettings());
 
@@ -39,7 +50,9 @@ export default class Prefs extends ExtensionPreferences {
     window.set_default_size(width, height);
 
     const page = Adw.PreferencesPage.new();
+    page.set_title('GNOME Wobbly Windows');
 
+    // Settings group 1: Friction, Spring, Speedup Factor, Mass
     const group1 = Adw.PreferencesGroup.new();
     this.frictionSlider = this.addSlider(
       group1,
@@ -75,6 +88,7 @@ export default class Prefs extends ExtensionPreferences {
     );
     page.add(group1);
 
+    // Settings group 2: X Tiles, Y Tiles, Maximize effect, Resize effect
     const group2 = Adw.PreferencesGroup.new();
     this.xTilesSlider = this.addSlider(
       group2,
@@ -104,11 +118,18 @@ export default class Prefs extends ExtensionPreferences {
     );
     page.add(group2);
 
+    // Reset button
     this.addResetButton(window, settingsData);
 
     window.add(page);
   }
 
+  /**
+   * Add reset button
+   *
+   * @param {Gtk.Window} window
+   * @param {Object} settingsData
+   */
   addResetButton(window, settingsData) {
     const button = new Gtk.Button({ vexpand: true, valign: Gtk.Align.END });
     button.set_icon_name('edit-clear');
@@ -141,6 +162,16 @@ export default class Prefs extends ExtensionPreferences {
     return button;
   }
 
+  /**
+   * Add slider
+   *
+   * @param {Adw.PreferencesGroup} group
+   * @param {string} labelText
+   * @param {Object} settingsData
+   * @param {number} lower
+   * @param {number} upper
+   * @param {number} decimalDigits
+   */
   addSlider(group, labelText, settingsData, lower, upper, decimalDigits) {
     const scale = new Gtk.Scale({
       digits: decimalDigits,
@@ -167,6 +198,13 @@ export default class Prefs extends ExtensionPreferences {
     return scale;
   }
 
+  /**
+   * Add boolean switch
+   *
+   * @param {Adw.PreferencesGroup} group
+   * @param {string} labelText
+   * @param {Object} settingsData
+   */
   addBooleanSwitch(group, labelText, settingsData) {
     const gtkSwitch = new Gtk.Switch({ hexpand: true, halign: Gtk.Align.END });
     gtkSwitch.set_active(settingsData.get());
@@ -186,6 +224,12 @@ export default class Prefs extends ExtensionPreferences {
     return gtkSwitch;
   }
 
+  /**
+   * Find widget by type
+   *
+   * @param {object} parent
+   * @param {object} type
+   */
   findWidgetByType(parent, type) {
     for (const child of [...parent]) {
       if (child instanceof type) return child;

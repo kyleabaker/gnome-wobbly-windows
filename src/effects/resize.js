@@ -29,11 +29,25 @@ import Clutter from 'gi://Clutter';
 import Meta from 'gi://Meta';
 import GObject from 'gi://GObject';
 
+/**
+ * Resize Effect: Resize Effect for GNOME Shell. Renders a window resize effect for wobbly windows effect for GNOME Shell.
+ *
+ * @name ResizeEffect
+ * @description Resize Effect for GNOME Shell. Renders a window resize effect for wobbly windows effect for GNOME Shell.
+ * @module effects/resize
+ */
 export class ResizeEffect extends Clutter.DeformEffect {
   static {
     GObject.registerClass(this);
   }
 
+  /**
+   * Constructor for the ResizeEffect class.
+   *
+   * @constructor
+   * @description Constructor for the ResizeEffect class.
+   * @param {object} params - Parameters for the effect.
+   */
   _init(params = {}) {
     super._init();
     this.operationType = params.op;
@@ -74,6 +88,11 @@ export class ResizeEffect extends Clutter.DeformEffect {
     this._destroyed = false;
   }
 
+  /**
+   * Set the actor for the effect.
+   *
+   * @param {Clutter.Actor} actor
+   */
   vfunc_set_actor(actor) {
     super.vfunc_set_actor(actor);
 
@@ -92,10 +111,18 @@ export class ResizeEffect extends Clutter.DeformEffect {
     }
   }
 
-  vfunc_modify_paint_volume(_) {
+  /**
+   * Modify the paint volume for the effect.
+   *
+   * @param {Clutter.PaintVolume} pv
+   */
+  vfunc_modify_paint_volume(pv) {
     return false;
   }
 
+  /**
+   * Destroy the effect.
+   */
   destroy() {
     if (this._destroyed) return;
     this._destroyed = true;
@@ -121,6 +148,11 @@ export class ResizeEffect extends Clutter.DeformEffect {
     }
   }
 
+  /**
+   * End the effect.
+   *
+   * @param {Clutter.Actor} actor
+   */
   on_end_event(actor) {
     [this.xDeltaStop, this.yDeltaStop] = [this.xDelta * 1.5, this.yDelta * 1.5];
 
@@ -138,6 +170,12 @@ export class ResizeEffect extends Clutter.DeformEffect {
     this.timerId.start();
   }
 
+  /**
+   * Stop the effect.
+   *
+   * @param {Clutter.Timeline} timer
+   * @param {number} msec
+   */
   on_stop_effect_event(timer, msec) {
     const progress = timer.get_progress();
 
@@ -151,6 +189,11 @@ export class ResizeEffect extends Clutter.DeformEffect {
     this.invalidate();
   }
 
+  /**
+   * Move the effect.
+   *
+   * @param {Clutter.Actor} actor
+   */
   on_move_event(actor) {
     const [xPointer, yPointer] = global.get_pointer();
 
@@ -160,6 +203,13 @@ export class ResizeEffect extends Clutter.DeformEffect {
     [this.xOld, this.yOld] = [xPointer, yPointer];
   }
 
+  /**
+   * Deform the vertex. Creates a wobbly effect.
+   *
+   * @param {number} w
+   * @param {number} h
+   * @param {Clutter.Vertex}
+   */
   vfunc_deform_vertex(w, h, v) {
     const pow2 = (x) => x * x;
     const op = this.operationType;

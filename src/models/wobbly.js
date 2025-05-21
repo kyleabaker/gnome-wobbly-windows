@@ -31,7 +31,19 @@
  */
 'use strict';
 
+/**
+ * Wobbly model: creates a grid of objects and springs between them to simulate a wobbly window.
+ *
+ * @name WobblyModel
+ * @description Wobbly model that creates a grid of objects and springs between them to simulate a wobbly window.
+ * @module models/wobbly
+ */
 export class WobblyModel {
+  /**
+   * Constructor for the WobblyModel class.
+   *
+   * @param {*} config
+   */
   constructor(config) {
     this.GRID_WIDTH = 4;
     this.GRID_HEIGHT = 4;
@@ -55,11 +67,17 @@ export class WobblyModel {
     this.initSprings();
   }
 
+  /**
+   * Dispose the model.
+   */
   dispose() {
     this.objects = null;
     this.springs = null;
   }
 
+  /**
+   * Create a new object.
+   */
   _createObject() {
     return {
       forceX: 0,
@@ -72,6 +90,9 @@ export class WobblyModel {
     };
   }
 
+  /**
+   * Initialize the object positions.
+   */
   _initializeObjectPositions() {
     const gw = this.GRID_WIDTH - 1;
     const gh = this.GRID_HEIGHT - 1;
@@ -86,11 +107,15 @@ export class WobblyModel {
     }
   }
 
+  /**
+   * Initialize the springs.
+   */
   initSprings() {
     let i = 0;
     const hpad = this.width / (this.GRID_WIDTH - 1);
     const vpad = this.height / (this.GRID_HEIGHT - 1);
 
+    // Horizontal and vertical springs, one per object
     for (let gridY = 0; gridY < this.GRID_HEIGHT; gridY++) {
       for (let gridX = 0; gridX < this.GRID_WIDTH; gridX++) {
         if (gridX > 0) {
@@ -114,10 +139,17 @@ export class WobblyModel {
     }
   }
 
+  /**
+   * Find the nearest object to the given coordinates.
+   *
+   * @param {number} x
+   * @param {number} y
+   */
   nearestObject(x, y) {
     let minDistance = Infinity;
     let result = null;
 
+    // Find the nearest object
     for (const object of this.objects) {
       const dx = Math.abs(object.x - x);
       const dy = Math.abs(object.y - y);
@@ -132,11 +164,20 @@ export class WobblyModel {
     return result;
   }
 
+  /**
+   * Grab the nearest object to the given coordinates.
+   *
+   * @param {number} x
+   * @param {number} y
+   */
   grab(x, y) {
     this.immobileObject = this.nearestObject(x, y);
     if (this.immobileObject) this.immobileObject.immobile = true;
   }
 
+  /**
+   * Maximize the window.
+   */
   maximize() {
     this.immobileObject = null;
 
@@ -149,6 +190,7 @@ export class WobblyModel {
       if (obj) obj.immobile = true;
     }
 
+    // Maximize
     for (const spring of this.springs) {
       if ([topLeft, topRight, bottomLeft, bottomRight].includes(spring.a)) {
         spring.b.velocityX -= spring.offsetX * this.INTENSITY;
@@ -164,10 +206,14 @@ export class WobblyModel {
     this.step(0);
   }
 
+  /**
+   * Unmaximize the window.
+   */
   unmaximize() {
     this.immobileObject = this.nearestObject(this.width / 2, this.height / 2);
     if (this.immobileObject) this.immobileObject.immobile = true;
 
+    // Unmaximize
     for (const spring of this.springs) {
       if (spring.a === this.immobileObject) {
         spring.b.velocityX -= spring.offsetX * this.INTENSITY;
@@ -181,9 +227,15 @@ export class WobblyModel {
     this.step(0);
   }
 
+  /**
+   * Step the model.
+   *
+   * @param {number} steps
+   */
   step(steps) {
     let movementStep = false;
 
+    // Apply forces
     for (let j = steps; j >= 0; --j) {
       for (const spring of this.springs) {
         const fx = this.springK * (spring.b.x - spring.a.x - spring.offsetX);
@@ -219,6 +271,12 @@ export class WobblyModel {
     this.movement = movementStep;
   }
 
+  /**
+   * Move the object.
+   *
+   * @param {number} deltaX
+   * @param {number} deltaY
+   */
   move(deltaX, deltaY) {
     if (this.immobileObject) {
       this.immobileObject.x += deltaX;

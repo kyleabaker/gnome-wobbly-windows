@@ -37,7 +37,16 @@ import { ResizeEffect } from './src/effects/resize.js';
 
 const EFFECT_NAME = 'gnome-wobbly-windows';
 
+/**
+ * Gnome Wobbly Windows extension
+ *
+ * @name GnomeWobblyWindowsExtension
+ * @description Gnome Wobbly Windows extension
+ */
 export default class GnomeWobblyWindowsExtension extends Extension {
+  /**
+   * Enables the extension
+   */
   enable() {
     this.settingsData = createSettingsData(this.getSettings());
 
@@ -143,6 +152,7 @@ export default class GnomeWobblyWindowsExtension extends Extension {
     this.endResizeOpId = global.window_manager.connect(
       'size-changed',
       (wm, actor) => {
+        // check if the window is resized
         if (
           !actor ||
           !this.resizedActor ||
@@ -158,6 +168,7 @@ export default class GnomeWobblyWindowsExtension extends Extension {
 
         this.resizedActor = null;
 
+        // check if the window is maximized
         if (actor.metaWindow.get_maximized()) {
           this.destroyActorEffect(actor);
 
@@ -168,6 +179,7 @@ export default class GnomeWobblyWindowsExtension extends Extension {
           let monitor =
             Main.layoutManager.monitors[actor.meta_window.get_monitor()];
 
+          // check if the window is maximized vertically
           if (
             actor.metaWindow.get_maximized() === Meta.MaximizeFlags.BOTH ||
             (actor.metaWindow.get_maximized() === Meta.MaximizeFlags.VERTICAL &&
@@ -193,6 +205,7 @@ export default class GnomeWobblyWindowsExtension extends Extension {
             );
           }
         } else {
+          // check if the window is moved
           let effect = actor.get_effect(EFFECT_NAME);
           if (effect && 'move' === effect.operationType) {
             this.destroyActorEffect(actor);
@@ -210,6 +223,9 @@ export default class GnomeWobblyWindowsExtension extends Extension {
     });
   }
 
+  /**
+   * Disable the effect.
+   */
   disable() {
     if (this.settingsData) {
       this.settingsData = null;
@@ -246,6 +262,11 @@ export default class GnomeWobblyWindowsExtension extends Extension {
     });
   }
 
+  /**
+   * Destroy the actor effect.
+   *
+   * @param {Clutter.Actor} actor
+   */
   destroyActorEffect(actor) {
     if (!actor) {
       return;

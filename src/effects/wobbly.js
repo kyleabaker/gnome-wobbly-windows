@@ -30,6 +30,14 @@ import GObject from 'gi://GObject';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import { WobblyModel } from '../models/wobbly.js';
 
+/**
+ * Wobbly effect: wobbly windows effect for GNOME Shell. Based on the
+ * Compiz Wobbly Windows effect.
+ *
+ * @name WobblyEffect
+ * @description Wobbly windows effect for GNOME Shell (similar to the Compiz Wobbly Windows effect).
+ * @module effects/wobbly
+ */
 export class WobblyEffect extends Clutter.DeformEffect {
   static CLUTTER_TIMELINE_DURATION = 1000 * 1000;
 
@@ -37,6 +45,13 @@ export class WobblyEffect extends Clutter.DeformEffect {
     GObject.registerClass(this);
   }
 
+  /**
+   * Constructor for the WobblyEffect class.
+   *
+   * @constructor
+   * @description Constructor for the WobblyEffect class.
+   * @param {object} params - Parameters for the effect.
+   */
   _init(params = {}) {
     super._init();
     this._destroyed = false;
@@ -83,6 +98,11 @@ export class WobblyEffect extends Clutter.DeformEffect {
     this.ended = false;
   }
 
+  /**
+   * Set the actor for the effect.
+   *
+   * @param {Clutter.Actor} actor
+   */
   vfunc_set_actor(actor) {
     super.vfunc_set_actor(actor);
 
@@ -178,10 +198,18 @@ export class WobblyEffect extends Clutter.DeformEffect {
     }
   }
 
+  /**
+   * Modify the paint volume for the effect.
+   *
+   * @param {Clutter.PaintVolume} pv
+   */
   vfunc_modify_paint_volume(pv) {
     return false;
   }
 
+  /**
+   * Destroy the effect.
+   */
   destroy() {
     if (this._destroyed) return;
     this._destroyed = true;
@@ -208,10 +236,22 @@ export class WobblyEffect extends Clutter.DeformEffect {
     }
   }
 
+  /**
+   * End the effect.
+   *
+   * @param {Clutter.Actor} actor
+   */
   on_end_event(actor) {
     this.ended = true;
   }
 
+  /**
+   * Move the effect.
+   *
+   * @param {Clutter.Actor} actor
+   * @param {Clutter.ActorAllocation} allocation
+   * @param {number} flags
+   */
   on_move_event(actor, allocation, flags) {
     if (!actor || !this.wobblyModel) return;
 
@@ -226,6 +266,12 @@ export class WobblyEffect extends Clutter.DeformEffect {
     this.wobblyModel?.move(deltaX, deltaY);
   }
 
+  /**
+   * Update the effect.
+   *
+   * @param {Clutter.Timeline} timer
+   * @param {number} msec
+   */
   on_new_frame_event(timer, msec) {
     if (this.ended && (!this.timerId || !this.wobblyModel?.movement)) {
       this.destroy();
@@ -262,6 +308,13 @@ export class WobblyEffect extends Clutter.DeformEffect {
     }
   }
 
+  /**
+   * Deform the vertex. Creates a wobbly effect.
+   *
+   * @param {number} w
+   * @param {number} h
+   * @param {Clutter.Vertex}
+   */
   vfunc_deform_vertex(w, h, v) {
     if (!this.deformedObjects?.length) return;
 

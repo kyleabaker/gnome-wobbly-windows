@@ -25,6 +25,12 @@
  */
 'use strict';
 
+/**
+ * Create the settings data object for the extension preferences window
+ *
+ * @param {*} settings
+ * @returns settings data object
+ */
 export function createSettingsData(settings) {
   const doubleKeys = [
     ['FRICTION', 'friction'],
