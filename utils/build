@@ -3,6 +3,9 @@
 # Clean the code
 npm run format
 
+# ESLint
+npm run lint
+
 UUID=$(jq -r .uuid metadata.json)
 ZIPNAME="$UUID.zip"
 

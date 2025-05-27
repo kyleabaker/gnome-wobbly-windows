@@ -116,7 +116,8 @@ export class ResizeEffect extends Clutter.DeformEffect {
    *
    * @param {Clutter.PaintVolume} pv
    */
-  vfunc_modify_paint_volume(pv) {
+  // eslint-disable-next-line no-unused-vars
+  vfunc_modify_paint_volume(_pv) {
     return false;
   }
 
@@ -176,7 +177,8 @@ export class ResizeEffect extends Clutter.DeformEffect {
    * @param {Clutter.Timeline} timer
    * @param {number} msec
    */
-  on_stop_effect_event(timer, msec) {
+  // eslint-disable-next-line no-unused-vars
+  on_stop_effect_event(timer, _msec) {
     const progress = timer.get_progress();
 
     // easeOutCubic: f(t) = 1 - (1 - t)^3
@@ -194,7 +196,8 @@ export class ResizeEffect extends Clutter.DeformEffect {
    *
    * @param {Clutter.Actor} actor
    */
-  on_move_event(actor) {
+  // eslint-disable-next-line no-unused-vars
+  on_move_event(_actor) {
     const [xPointer, yPointer] = global.get_pointer();
 
     this.xDelta += (this.xOld - xPointer) * this.X_MULTIPLIER;

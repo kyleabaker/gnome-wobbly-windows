@@ -27,7 +27,9 @@
 
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
+
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+
 import { WobblyModel } from '../models/wobbly.js';
 
 /**
@@ -203,7 +205,8 @@ export class WobblyEffect extends Clutter.DeformEffect {
    *
    * @param {Clutter.PaintVolume} pv
    */
-  vfunc_modify_paint_volume(pv) {
+  // eslint-disable-next-line no-unused-vars
+  vfunc_modify_paint_volume(_pv) {
     return false;
   }
 
@@ -241,7 +244,8 @@ export class WobblyEffect extends Clutter.DeformEffect {
    *
    * @param {Clutter.Actor} actor
    */
-  on_end_event(actor) {
+  // eslint-disable-next-line no-unused-vars
+  on_end_event(_actor) {
     this.ended = true;
   }
 
@@ -252,7 +256,8 @@ export class WobblyEffect extends Clutter.DeformEffect {
    * @param {Clutter.ActorAllocation} allocation
    * @param {number} flags
    */
-  on_move_event(actor, allocation, flags) {
+  // eslint-disable-next-line no-unused-vars
+  on_move_event(actor, _allocation, _flags) {
     if (!actor || !this.wobblyModel) return;
 
     [this.oldX, this.oldY] = [this.newX, this.newY];

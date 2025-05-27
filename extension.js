@@ -28,7 +28,6 @@
 import Meta from 'gi://Meta';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-
 import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import { createSettingsData } from './src/settings/data.js';
@@ -108,7 +107,8 @@ export default class GnomeWobblyWindowsExtension extends Extension {
 
     this.grabOpEndId = global.display.connect(
       'grab-op-end',
-      (display, window, op) => {
+      // eslint-disable-next-line no-unused-vars
+      (_display, window, _op) => {
         let actor = window ? window.get_compositor_private() : null;
         if (!actor) {
           return;
@@ -123,7 +123,8 @@ export default class GnomeWobblyWindowsExtension extends Extension {
 
     this.startResizeOpId = global.window_manager.connect(
       'size-change',
-      (wm, actor, op, oldFrameRect, oldBufferRect) => {
+      // eslint-disable-next-line no-unused-vars
+      (_wm, actor, op, _oldFrameRect, _oldBufferRect) => {
         if (!actor) {
           return;
         }

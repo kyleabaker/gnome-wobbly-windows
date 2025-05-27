@@ -1,9 +1,9 @@
 {
-  "description": "GNOME Wobbly Windows effect for GNOME Shell. This extension mimics the original Compiz plugin engine to render the Wobby Windows feature.\n\nNote: This extension does not require any additional or external libraries for functionality.\n\nTroubleshooting:\nIn case of update error please restart GNOME Shell via:\n1. Xorg: press ALT+F2 then write r and press enter.\n2. Wayland: end the session by logging out and log in again.\n\n\n",
   "name": "GNOME Wobbly Windows",
-  "shell-version": ["45", "46", "47", "48"],
+  "description": "GNOME Wobbly Windows effect for GNOME Shell. This extension mimics the original Compiz plugin engine to render the Wobby Windows feature.\n\nNote: This extension does not require any additional or external libraries for functionality.\n\nTroubleshooting:\nIn case of update error please restart GNOME Shell via:\n1. Xorg: press ALT+F2 then write r and press enter.\n2. Wayland: end the session by logging out and log in again.\n\n\n",
   "url": "https://github.com/kyleabaker/gnome-wobbly-windows",
   "uuid": "gnome-wobbly-windows@kyleabaker.github.com",
   "settings-schema": "org.gnome.shell.extensions.com.github.kyleabaker.gnome-wobbly-windows",
-  "version": 26
+  "shell-version": ["45", "46", "47", "48"],
+  "version": 1
 }

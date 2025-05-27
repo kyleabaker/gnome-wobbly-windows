@@ -155,9 +155,7 @@ export default class Prefs extends ExtensionPreferences {
     });
 
     const header = this.findWidgetByType(window.get_content(), Adw.HeaderBar);
-    if (header) {
-      header.pack_start(button);
-    }
+    if (header) header.pack_start(button);
 
     return button;
   }
@@ -182,13 +180,14 @@ export default class Prefs extends ExtensionPreferences {
     });
     scale.set_draw_value(true);
     scale.set_value(settingsData.get());
+    scale.set_size_request(400, 15);
+
     scale.connect('value-changed', (sw) => {
       const newval = sw.get_value();
       if (newval != settingsData.get()) {
         settingsData.set(newval);
       }
     });
-    scale.set_size_request(400, 15);
 
     const row = Adw.ActionRow.new();
     row.set_title(labelText);
@@ -209,6 +208,7 @@ export default class Prefs extends ExtensionPreferences {
     const gtkSwitch = new Gtk.Switch({ hexpand: true, halign: Gtk.Align.END });
     gtkSwitch.set_active(settingsData.get());
     gtkSwitch.set_valign(Gtk.Align.CENTER);
+
     gtkSwitch.connect('state-set', (sw) => {
       const newval = sw.get_active();
       if (newval != settingsData.get()) {
