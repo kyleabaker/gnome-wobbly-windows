@@ -44,6 +44,7 @@ export function createSettingsData(settings) {
   const booleanKeys = [
     ['MAXIMIZE_EFFECT', 'maximize-effect'],
     ['RESIZE_EFFECT', 'resize-effect'],
+    ['ENABLE_LOGGING', 'enable-logging'],
   ];
 
   const data = {};

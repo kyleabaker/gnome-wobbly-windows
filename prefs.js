@@ -118,6 +118,15 @@ export default class Prefs extends ExtensionPreferences {
     );
     page.add(group2);
 
+    // Settings group 3: Enable Logging
+    const group3 = Adw.PreferencesGroup.new();
+    this.enableLoggingSwitch = this.addBooleanSwitch(
+      group3,
+      'Enable Logging',
+      settingsData.ENABLE_LOGGING
+    );
+    page.add(group3);
+
     // Reset button
     this.addResetButton(window, settingsData);
 
@@ -143,6 +152,7 @@ export default class Prefs extends ExtensionPreferences {
       settingsData.Y_TILES.set(6.0);
       settingsData.MAXIMIZE_EFFECT.set(true);
       settingsData.RESIZE_EFFECT.set(false);
+      settingsData.ENABLE_LOGGING.set(false);
 
       this.frictionSlider.set_value(settingsData.FRICTION.get());
       this.springKSlider.set_value(settingsData.SPRING_K.get());
@@ -152,6 +162,7 @@ export default class Prefs extends ExtensionPreferences {
       this.yTilesSlider.set_value(settingsData.Y_TILES.get());
       this.maximizeEffectSwitch.set_active(settingsData.MAXIMIZE_EFFECT.get());
       this.resizeEffectSwitch.set_active(settingsData.RESIZE_EFFECT.get());
+      this.enableLoggingSwitch.set_value(settingsData.ENABLE_LOGGING.get());
     });
 
     const header = this.findWidgetByType(window.get_content(), Adw.HeaderBar);

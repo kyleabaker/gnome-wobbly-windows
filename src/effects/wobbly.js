@@ -85,14 +85,19 @@ export class WobblyEffect extends Clutter.DeformEffect {
     this.tilesX = 0;
     this.tilesY = 0;
 
-    this.FRICTION = this.settingsData.FRICTION.get();
-    this.SPRING_K = this.settingsData.SPRING_K.get();
-    this.SPEEDUP_FACTOR = this.settingsData.SPEEDUP_FACTOR.get();
-    this.MASS = this.settingsData.MASS.get();
+    this.FRICTION = this.settingsData?.FRICTION?.get?.() || 3.5;
+    this.SPRING_K = this.settingsData?.SPRING_K?.get?.() || 3.8;
+    this.SPEEDUP_FACTOR = this.settingsData?.SPEEDUP_FACTOR?.get?.() || 12.0;
+    this.MASS = this.settingsData?.MASS?.get?.() || 70.0;
     this.X_TILES =
-      'maximized' === this.operationType ? 10 : this.settingsData.X_TILES.get();
+      'maximized' === this.operationType
+        ? 10
+        : this.settingsData?.X_TILES?.get?.() || 6.0;
     this.Y_TILES =
-      'maximized' === this.operationType ? 10 : this.settingsData.Y_TILES.get();
+      'maximized' === this.operationType
+        ? 10
+        : this.settingsData?.Y_TILES?.get?.() || 6.0;
+    this.ENABLE_LOGGING = this.settingsData?.ENABLE_LOGGING?.get?.() || false;
 
     this.set_n_tiles(this.X_TILES, this.Y_TILES);
 

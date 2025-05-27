@@ -82,6 +82,8 @@ export class ResizeEffect extends Clutter.DeformEffect {
     this.X_TILES = 20;
     this.Y_TILES = 20;
 
+    this.ENABLE_LOGGING = this.settingsData?.ENABLE_LOGGING?.get?.() || false;
+
     this.set_n_tiles(this.X_TILES, this.Y_TILES);
 
     this.initialized = false;
