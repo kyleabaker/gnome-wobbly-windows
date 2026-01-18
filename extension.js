@@ -33,6 +33,7 @@ import { Extension } from 'resource:///org/gnome/shell/extensions/extension.js';
 import { createSettingsData } from './src/settings/data.js';
 import { WobblyEffect } from './src/effects/wobbly.js';
 import { ResizeEffect } from './src/effects/resize.js';
+import { getMaximizedFlags } from './src/helpers/getMaximized.js';
 
 const EFFECT_NAME = 'gnome-wobbly-windows';
 
@@ -170,7 +171,7 @@ export default class GnomeWobblyWindowsExtension extends Extension {
         this.resizedActor = null;
 
         // check if the window is maximized
-        if (actor.metaWindow.get_maximized()) {
+        if (getMaximizedFlags(actor.metaWindow)) {
           this.destroyActorEffect(actor);
 
           if (!this.settingsData.MAXIMIZE_EFFECT.get()) {
@@ -182,8 +183,9 @@ export default class GnomeWobblyWindowsExtension extends Extension {
 
           // check if the window is maximized vertically
           if (
-            actor.metaWindow.get_maximized() === Meta.MaximizeFlags.BOTH ||
-            (actor.metaWindow.get_maximized() === Meta.MaximizeFlags.VERTICAL &&
+            getMaximizedFlags(actor.metaWindow) === Meta.MaximizeFlags.BOTH ||
+            (getMaximizedFlags(actor.metaWindow) ===
+              Meta.MaximizeFlags.VERTICAL &&
               (sourceRect.y != targetRect.y ||
                 sourceRect.y + sourceRect.height !=
                   targetRect.y + targetRect.height ||
