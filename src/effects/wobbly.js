@@ -237,7 +237,7 @@ export class WobblyEffect extends Clutter.DeformEffect {
     this.wobblyModel = null;
 
     const actor = this.get_actor();
-    if (actor) {
+    if (actor && !actor.is_destroyed()) {
       if (this.paintEvent) actor.disconnect(this.paintEvent);
       if (this.moveEvent) actor.disconnect(this.moveEvent);
       actor.remove_effect(this);
@@ -263,7 +263,7 @@ export class WobblyEffect extends Clutter.DeformEffect {
    */
   // eslint-disable-next-line no-unused-vars
   on_move_event(actor, _allocation, _flags) {
-    if (!actor || !this.wobblyModel) return;
+    if (!actor || actor.is_destroyed() || !this.wobblyModel) return;
 
     [this.oldX, this.oldY] = [this.newX, this.newY];
     [this.newX, this.newY] = actor.get_position();
@@ -283,7 +283,13 @@ export class WobblyEffect extends Clutter.DeformEffect {
    * @param {number} msec
    */
   on_new_frame_event(timer, msec) {
-    if (this.ended && (!this.timerId || !this.wobblyModel?.movement)) {
+    const actor = this.get_actor();
+    if (!actor || actor.is_destroyed()) {
+      this.destroy();
+      return;
+    }
+
+    if (this.ended && !this.wobblyModel?.movement) {
       this.destroy();
       return;
     }
@@ -306,16 +312,7 @@ export class WobblyEffect extends Clutter.DeformEffect {
       }
     }
 
-    const actor = this.actor;
-    if (!actor) return;
-
-    [this.actorX, this.actorY] = this.actor.get_position();
-    if (
-      (this.newX === this.actorX && this.newY === this.actorY) ||
-      'move' !== this.operationType
-    ) {
-      this.invalidate();
-    }
+    this.invalidate();
   }
 
   /**

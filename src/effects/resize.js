@@ -29,6 +29,8 @@ import Clutter from 'gi://Clutter';
 import Meta from 'gi://Meta';
 import GObject from 'gi://GObject';
 
+const pow2 = (x) => x * x;
+
 /**
  * Resize Effect: Resize Effect for GNOME Shell. Renders a window resize effect for wobbly windows effect for GNOME Shell.
  *
@@ -138,7 +140,7 @@ export class ResizeEffect extends Clutter.DeformEffect {
     }
 
     const actor = this.get_actor();
-    if (actor) {
+    if (actor && !actor.is_destroyed()) {
       if (this.paintEvent) {
         actor.disconnect(this.paintEvent);
         this.paintEvent = null;
@@ -216,7 +218,6 @@ export class ResizeEffect extends Clutter.DeformEffect {
    * @param {Clutter.Vertex}
    */
   vfunc_deform_vertex(w, h, v) {
-    const pow2 = (x) => x * x;
     const op = this.operationType;
 
     switch (op) {

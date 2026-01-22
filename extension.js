@@ -72,16 +72,19 @@ export default class GnomeWobblyWindowsExtension extends Extension {
       'grab-op-begin',
       (display, window, op) => {
         if (
-          Meta.GrabOp.MOVING != op &&
-          (!Meta.GrabOp.MOVING_UNCONSTRAINED ||
-            Meta.GrabOp.MOVING_UNCONSTRAINED != op) &&
+          op !== Meta.GrabOp.MOVING &&
+          op !== Meta.GrabOp.MOVING_UNCONSTRAINED &&
           (!this.settingsData.RESIZE_EFFECT.get() ||
-            this.allowedResizeOp.indexOf(op) === -1)
+            !this.allowedResizeOp.includes(op))
         ) {
           return;
         }
 
-        let actor = window ? window.get_compositor_private() : null;
+        if (!window) {
+          return;
+        }
+
+        const actor = window.get_compositor_private();
         if (!actor) {
           return;
         }
@@ -110,12 +113,16 @@ export default class GnomeWobblyWindowsExtension extends Extension {
       'grab-op-end',
       // eslint-disable-next-line no-unused-vars
       (_display, window, _op) => {
-        let actor = window ? window.get_compositor_private() : null;
+        if (!window) {
+          return;
+        }
+
+        const actor = window.get_compositor_private();
         if (!actor) {
           return;
         }
 
-        let effect = actor.get_effect(EFFECT_NAME);
+        const effect = actor.get_effect(EFFECT_NAME);
         if (effect) {
           effect.on_end_event(actor);
         }
@@ -126,18 +133,18 @@ export default class GnomeWobblyWindowsExtension extends Extension {
       'size-change',
       // eslint-disable-next-line no-unused-vars
       (_wm, actor, op, _oldFrameRect, _oldBufferRect) => {
-        if (!actor) {
+        if (!actor || actor.is_destroyed() || !actor.meta_window) {
           return;
         }
 
         this.resizedActor = actor;
         this.resizedActor.sourceRect = actor.meta_window.get_frame_rect();
 
-        if (!op || Meta.SizeChange.UNMAXIMIZE != op) {
+        if (op !== Meta.SizeChange.UNMAXIMIZE) {
           return;
         }
 
-        let effect = actor.get_effect(EFFECT_NAME);
+        const effect = actor.get_effect(EFFECT_NAME);
         if (!effect || effect.operationType != 'move') {
           this.destroyActorEffect(actor);
           actor.add_effect_with_name(
@@ -157,43 +164,46 @@ export default class GnomeWobblyWindowsExtension extends Extension {
         // check if the window is resized
         if (
           !actor ||
+          actor.is_destroyed() ||
           !this.resizedActor ||
           actor != this.resizedActor ||
-          !this.resizedActor.sourceRect
+          !this.resizedActor.sourceRect ||
+          !actor.meta_window
         ) {
           this.resizedActor = null;
           return;
         }
 
-        let sourceRect = this.resizedActor.sourceRect;
-        let targetRect = actor.meta_window.get_frame_rect();
+        const sourceRect = this.resizedActor.sourceRect;
+        const targetRect = actor.meta_window.get_frame_rect();
 
         this.resizedActor = null;
 
+        const maximizedFlags = getMaximizedFlags(actor.meta_window);
+
         // check if the window is maximized
-        if (getMaximizedFlags(actor.metaWindow)) {
+        if (maximizedFlags) {
           this.destroyActorEffect(actor);
 
           if (!this.settingsData.MAXIMIZE_EFFECT.get()) {
             return;
           }
 
-          let monitor =
+          const monitor =
             Main.layoutManager.monitors[actor.meta_window.get_monitor()];
 
           // check if the window is maximized vertically
           if (
-            getMaximizedFlags(actor.metaWindow) === Meta.MaximizeFlags.BOTH ||
-            (getMaximizedFlags(actor.metaWindow) ===
-              Meta.MaximizeFlags.VERTICAL &&
-              (sourceRect.y != targetRect.y ||
-                sourceRect.y + sourceRect.height !=
+            maximizedFlags === Meta.MaximizeFlags.BOTH ||
+            (maximizedFlags === Meta.MaximizeFlags.VERTICAL &&
+              (sourceRect.y !== targetRect.y ||
+                sourceRect.y + sourceRect.height !==
                   targetRect.y + targetRect.height ||
-                (sourceRect.x === monitor.x && targetRect.x != monitor.x) ||
-                (sourceRect.x != monitor.x && targetRect.x === monitor.x) ||
+                (sourceRect.x === monitor.x && targetRect.x !== monitor.x) ||
+                (sourceRect.x !== monitor.x && targetRect.x === monitor.x) ||
                 (sourceRect.x + sourceRect.width ===
                   monitor.x + monitor.width &&
-                  targetRect.x + targetRect.width !=
+                  targetRect.x + targetRect.width !==
                     monitor.x + monitor.width) ||
                 (sourceRect.x + sourceRect.width != monitor.x + monitor.width &&
                   targetRect.x + targetRect.width ===
@@ -209,7 +219,7 @@ export default class GnomeWobblyWindowsExtension extends Extension {
           }
         } else {
           // check if the window is moved
-          let effect = actor.get_effect(EFFECT_NAME);
+          const effect = actor.get_effect(EFFECT_NAME);
           if (effect && 'move' === effect.operationType) {
             this.destroyActorEffect(actor);
             actor.add_effect_with_name(
@@ -271,11 +281,11 @@ export default class GnomeWobblyWindowsExtension extends Extension {
    * @param {Clutter.Actor} actor
    */
   destroyActorEffect(actor) {
-    if (!actor) {
+    if (!actor || actor.is_destroyed()) {
       return;
     }
 
-    let effect = actor.get_effect(EFFECT_NAME);
+    const effect = actor.get_effect(EFFECT_NAME);
     if (effect) {
       effect.destroy();
     }
