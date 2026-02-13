@@ -1,6 +1,7 @@
 # GNOME Wobbly Windows effect for GNOME Shell
 
-[![Build and Release Extension](https://github.com/kyleabaker/gnome-wobbly-windows/actions/workflows/release.yml/badge.svg)](https://github.com/kyleabaker/gnome-wobbly-windows/actions)
+[![Build and Release Extension](https://github.com/kyleabaker/gnome-wobbly-windows/actions/workflows/release.yaml/badge.svg)](https://github.com/kyleabaker/gnome-wobbly-windows/actions)
+![CI Status](https://github.com/kyleabaker/gnome-wobbly-windows/actions/workflows/ci.yaml/badge.svg)
 [![Latest Release](https://img.shields.io/github/v/release/kyleabaker/gnome-wobbly-windows)](https://github.com/kyleabaker/gnome-wobbly-windows/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
