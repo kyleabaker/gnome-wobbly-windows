@@ -21,7 +21,7 @@ Optimizations and bugfixes:
 - Stability fixes and bugfixes.
 - Additional stability fixes for previously unchecked edge cases and undefined behavior.
 
-[<img src="assets/screenshot.png" width="100%">](https://extensions.gnome.org/extension/)
+[<img src="assets/screenshot.png" width="100%">](https://www.kyleabaker.com/goodies/linux/gnome-wobbly-windows-effect-for-gnome-shell/)
 
 ### Quick Install (One-Liner)
 
@@ -120,7 +120,7 @@ In case of update error please restart GNOME Shell via:
 
 ## Video
 
-You can see the original GNOME extension in action in this [video](https://youtu.be/G8bAVIB9A7A) as an example.
+You can see the original GNOME extension in action in this [video](https://www.kyleabaker.com/goodies/linux/gnome-wobbly-windows-effect-for-gnome-shell/) as an example.
 
 ## License
 
