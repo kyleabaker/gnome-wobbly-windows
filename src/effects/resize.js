@@ -81,8 +81,17 @@ export class ResizeEffect extends Clutter.DeformEffect {
       (this.settingsData.SPRING_K.get() * 2) / 10;
     this.CORNER_RESIZING_DIVIDER = 6;
 
-    this.X_TILES = 20;
-    this.Y_TILES = 20;
+    this.X_TILES = this.settingsData?.X_TILES?.get?.() || 6.0;
+    this.Y_TILES = this.settingsData?.Y_TILES?.get?.() || 6.0;
+
+    this._lastW = 0;
+    this._lastH = 0;
+    this._lastXDelta = 0;
+    this._lastYDelta = 0;
+    this._dxFactor = 0;
+    this._dyFactor = 0;
+    this._dxCornerFactor = 0;
+    this._dyCornerFactor = 0;
 
     this.ENABLE_LOGGING = this.settingsData?.ENABLE_LOGGING?.get?.() || false;
 
@@ -218,69 +227,65 @@ export class ResizeEffect extends Clutter.DeformEffect {
    * @param {Clutter.Vertex}
    */
   vfunc_deform_vertex(w, h, v) {
+    if (
+      this._lastW !== w ||
+      this._lastH !== h ||
+      this._lastXDelta !== this.xDelta ||
+      this._lastYDelta !== this.yDelta
+    ) {
+      this._lastW = w;
+      this._lastH = h;
+      this._lastXDelta = this.xDelta;
+      this._lastYDelta = this.yDelta;
+
+      const invH2W = h > 0 && w > 0 ? 1 / (h * h * w) : 0;
+      const invW2H = w > 0 && h > 0 ? 1 / (w * w * h) : 0;
+
+      this._dxFactor = this.xDelta * invH2W;
+      this._dyFactor = this.yDelta * invW2H;
+      this._dxCornerFactor =
+        (this.xDelta / this.CORNER_RESIZING_DIVIDER) * invH2W;
+      this._dyCornerFactor =
+        (this.yDelta / this.CORNER_RESIZING_DIVIDER) * invW2H;
+    }
+
     const op = this.operationType;
 
     switch (op) {
       case Meta.GrabOp.RESIZING_W:
-        v.x +=
-          (this.xDelta * (w - v.x) * pow2(v.y - this.yPickedUp)) / (h * h * w);
+        v.x += (w - v.x) * pow2(v.y - this.yPickedUp) * this._dxFactor;
         break;
 
       case Meta.GrabOp.RESIZING_E:
-        v.x += (this.xDelta * v.x * pow2(v.y - this.yPickedUp)) / (h * h * w);
+        v.x += v.x * pow2(v.y - this.yPickedUp) * this._dxFactor;
         break;
 
       case Meta.GrabOp.RESIZING_S:
-        v.y += (this.yDelta * v.y * pow2(v.x - this.xPickedUp)) / (w * w * h);
+        v.y += v.y * pow2(v.x - this.xPickedUp) * this._dyFactor;
         break;
 
       case Meta.GrabOp.RESIZING_N:
-        v.y +=
-          (this.yDelta * (h - v.y) * pow2(v.x - this.xPickedUp)) / (w * w * h);
+        v.y += (h - v.y) * pow2(v.x - this.xPickedUp) * this._dyFactor;
         break;
 
       case Meta.GrabOp.RESIZING_NW:
-        v.x +=
-          ((this.xDelta / this.CORNER_RESIZING_DIVIDER) *
-            (w - v.x) *
-            pow2(v.y)) /
-          (h * h * w);
-        v.y +=
-          ((this.yDelta / this.CORNER_RESIZING_DIVIDER) *
-            (h - v.y) *
-            pow2(v.x)) /
-          (w * w * h);
+        v.x += (w - v.x) * pow2(v.y) * this._dxCornerFactor;
+        v.y += (h - v.y) * pow2(v.x) * this._dyCornerFactor;
         break;
 
       case Meta.GrabOp.RESIZING_NE:
-        v.x +=
-          ((this.xDelta / this.CORNER_RESIZING_DIVIDER) * v.x * pow2(v.y)) /
-          (h * h * w);
-        v.y +=
-          ((this.yDelta / this.CORNER_RESIZING_DIVIDER) *
-            (h - v.y) *
-            pow2(w - v.x)) /
-          (w * w * h);
+        v.x += v.x * pow2(v.y) * this._dxCornerFactor;
+        v.y += (h - v.y) * pow2(w - v.x) * this._dyCornerFactor;
         break;
 
       case Meta.GrabOp.RESIZING_SE:
-        v.x +=
-          ((this.xDelta / this.CORNER_RESIZING_DIVIDER) * v.x * pow2(h - v.y)) /
-          (h * h * w);
-        v.y +=
-          ((this.yDelta / this.CORNER_RESIZING_DIVIDER) * v.y * pow2(w - v.x)) /
-          (w * w * h);
+        v.x += v.x * pow2(h - v.y) * this._dxCornerFactor;
+        v.y += v.y * pow2(w - v.x) * this._dyCornerFactor;
         break;
 
       case Meta.GrabOp.RESIZING_SW:
-        v.x +=
-          ((this.xDelta / this.CORNER_RESIZING_DIVIDER) *
-            (w - v.x) *
-            pow2(v.y - h)) /
-          (h * h * w);
-        v.y +=
-          ((this.yDelta / this.CORNER_RESIZING_DIVIDER) * v.y * pow2(v.x)) /
-          (w * w * h);
+        v.x += (w - v.x) * pow2(v.y - h) * this._dxCornerFactor;
+        v.y += v.y * pow2(v.x) * this._dyCornerFactor;
         break;
     }
   }

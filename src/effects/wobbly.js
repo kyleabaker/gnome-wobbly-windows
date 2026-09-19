@@ -80,10 +80,15 @@ export class WobblyEffect extends Clutter.DeformEffect {
     this.actorY = 0;
 
     this.wobblyModel = null;
-    this.coeff = [];
-    this.deformedObjects = [];
+    this.stride = 0;
+    this.coeff = null;
+    this.deformedX = null;
+    this.deformedY = null;
     this.tilesX = 0;
     this.tilesY = 0;
+    this.invWidth = 0;
+    this.invHeight = 0;
+    this.timeAccumulator = 0;
 
     this.FRICTION = this.settingsData?.FRICTION?.get?.() || 3.5;
     this.SPRING_K = this.settingsData?.SPRING_K?.get?.() || 3.8;
@@ -122,9 +127,18 @@ export class WobblyEffect extends Clutter.DeformEffect {
       [this.oldX, this.oldY] = [this.newX, this.newY];
       [this.mouseX, this.mouseY] = global.get_pointer();
       [this.tilesX, this.tilesY] = [this.X_TILES + 0.1, this.Y_TILES + 0.1];
+      this.invWidth = this.width > 0 ? 1 / this.width : 0;
+      this.invHeight = this.height > 0 ? 1 / this.height : 0;
 
-      this.coeff = Array.from({ length: this.Y_TILES + 1 }, () => []);
-      this.deformedObjects = Array.from({ length: this.Y_TILES + 1 }, () => []);
+      this.stride = this.X_TILES + 1;
+      const numPoints = this.stride * (this.Y_TILES + 1);
+
+      this.coeff = new Float32Array(numPoints * 16);
+      this.deformedX = new Float32Array(numPoints);
+      this.deformedY = new Float32Array(numPoints);
+
+      let pIdx = 0;
+      let cIdx = 0;
 
       for (let y = 0; y <= this.Y_TILES; y++) {
         const ty = y / this.Y_TILES;
@@ -140,26 +154,28 @@ export class WobblyEffect extends Clutter.DeformEffect {
           const tx3 = tx ** 2 * (1 - tx);
           const tx4 = tx ** 3;
 
-          this.coeff[y][x] = [
-            tx1 * ty1,
-            3 * tx2 * ty1,
-            3 * tx3 * ty1,
-            tx4 * ty1,
-            3 * tx1 * ty2,
-            9 * tx2 * ty2,
-            9 * tx3 * ty2,
-            3 * tx4 * ty2,
-            3 * tx1 * ty3,
-            9 * tx2 * ty3,
-            9 * tx3 * ty3,
-            3 * tx4 * ty3,
-            tx1 * ty4,
-            3 * tx2 * ty4,
-            3 * tx3 * ty4,
-            tx4 * ty4,
-          ];
+          this.coeff[cIdx] = tx1 * ty1;
+          this.coeff[cIdx + 1] = 3 * tx2 * ty1;
+          this.coeff[cIdx + 2] = 3 * tx3 * ty1;
+          this.coeff[cIdx + 3] = tx4 * ty1;
+          this.coeff[cIdx + 4] = 3 * tx1 * ty2;
+          this.coeff[cIdx + 5] = 9 * tx2 * ty2;
+          this.coeff[cIdx + 6] = 9 * tx3 * ty2;
+          this.coeff[cIdx + 7] = 3 * tx4 * ty2;
+          this.coeff[cIdx + 8] = 3 * tx1 * ty3;
+          this.coeff[cIdx + 9] = 9 * tx2 * ty3;
+          this.coeff[cIdx + 10] = 9 * tx3 * ty3;
+          this.coeff[cIdx + 11] = 3 * tx4 * ty3;
+          this.coeff[cIdx + 12] = tx1 * ty4;
+          this.coeff[cIdx + 13] = 3 * tx2 * ty4;
+          this.coeff[cIdx + 14] = 3 * tx3 * ty4;
+          this.coeff[cIdx + 15] = tx4 * ty4;
 
-          this.deformedObjects[y][x] = [tx * this.width, ty * this.height];
+          this.deformedX[pIdx] = tx * this.width;
+          this.deformedY[pIdx] = ty * this.height;
+
+          pIdx++;
+          cIdx += 16;
         }
       }
 
@@ -235,6 +251,10 @@ export class WobblyEffect extends Clutter.DeformEffect {
 
     this.wobblyModel?.dispose();
     this.wobblyModel = null;
+    this.coeff = null;
+    this.deformedX = null;
+    this.deformedY = null;
+    this.timeAccumulator = 0;
 
     const actor = this.get_actor();
     if (actor && !actor.is_destroyed()) {
@@ -294,22 +314,45 @@ export class WobblyEffect extends Clutter.DeformEffect {
       return;
     }
 
-    this.wobblyModel.step((msec - this.msecOld) / this.SPEEDUP_FACTOR);
+    let numSteps;
+    if (this.msecOld > 0) {
+      const elapsed = msec - this.msecOld;
+      this.timeAccumulator += elapsed / this.SPEEDUP_FACTOR;
+      numSteps = Math.floor(this.timeAccumulator);
+      if (numSteps > 4) {
+        numSteps = 4;
+        this.timeAccumulator = 0;
+      } else {
+        this.timeAccumulator -= numSteps;
+      }
+    } else {
+      numSteps = 1;
+    }
     this.msecOld = msec;
 
+    if (numSteps > 0) {
+      this.wobblyModel.step(numSteps);
+    }
+
     const obj = this.wobblyModel.objects;
-    for (let y = 0; y <= this.Y_TILES; y++) {
-      for (let x = 0; x <= this.X_TILES; x++) {
-        const coeff = this.coeff[y][x];
-        let dx = 0,
-          dy = 0;
-        for (let i = 0; i < 16; i++) {
-          dx += coeff[i] * obj[i].x;
-          dy += coeff[i] * obj[i].y;
-        }
-        this.deformedObjects[y][x][0] = dx;
-        this.deformedObjects[y][x][1] = dy;
+    const coeff = this.coeff;
+    const defX = this.deformedX;
+    const defY = this.deformedY;
+    const totalPoints = this.stride * (this.Y_TILES + 1);
+
+    let cIdx = 0;
+    for (let p = 0; p < totalPoints; p++) {
+      let dx = 0;
+      let dy = 0;
+      for (let i = 0; i < 16; i++) {
+        const c = coeff[cIdx + i];
+        const o = obj[i];
+        dx += c * o.x;
+        dy += c * o.y;
       }
+      defX[p] = dx;
+      defY[p] = dy;
+      cIdx += 16;
     }
 
     this.invalidate();
@@ -323,16 +366,16 @@ export class WobblyEffect extends Clutter.DeformEffect {
    * @param {Clutter.Vertex}
    */
   vfunc_deform_vertex(w, h, v) {
-    if (!this.deformedObjects?.length) return;
+    if (!this.deformedX) return;
 
     const ix = Math.min(Math.max(0, (v.tx * this.tilesX) >> 0), this.X_TILES);
     const iy = Math.min(Math.max(0, (v.ty * this.tilesY) >> 0), this.Y_TILES);
 
-    const point = this.deformedObjects[iy]?.[ix];
-    if (!point) return;
+    const idx = iy * this.stride + ix;
+    const x = this.deformedX[idx];
+    const y = this.deformedY[idx];
 
-    const [x, y] = point;
-    v.x = (x + this.deltaX) * (w / this.width);
-    v.y = (y + this.deltaY) * (h / this.height);
+    v.x = (x + this.deltaX) * (w * this.invWidth);
+    v.y = (y + this.deltaY) * (h * this.invHeight);
   }
 }
