@@ -232,11 +232,12 @@ export class WobblyModel {
    *
    * @param {number} steps
    */
-  step(steps) {
+  step(steps = 1) {
     let movementStep = false;
+    const count = Math.max(1, Math.floor(steps));
 
     // Apply forces
-    for (let j = steps; j >= 0; --j) {
+    for (let j = 0; j < count; j++) {
       for (const spring of this.springs) {
         const fx = this.springK * (spring.b.x - spring.a.x - spring.offsetX);
         spring.a.forceX += fx;
@@ -258,7 +259,12 @@ export class WobblyModel {
           object.x += object.velocityX;
           object.y += object.velocityY;
 
-          if (Math.abs(object.forceX) > 1 || Math.abs(object.forceY) > 1) {
+          if (
+            Math.abs(object.velocityX) > 0.05 ||
+            Math.abs(object.velocityY) > 0.05 ||
+            Math.abs(object.forceX) > 0.5 ||
+            Math.abs(object.forceY) > 0.5
+          ) {
             movementStep = true;
           }
 
